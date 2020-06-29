@@ -1,0 +1,11 @@
+moveit_setup_assistant_config:
+  URDF:
+    package: ""
+    relative_path: /home/roman/catkin_ws/src/URDF/turtlearm.urdf
+    xacro_args: ""
+  SRDF:
+    relative_path: config/turtlearm.srdf
+  CONFIG:
+    author_name: Roman Scherbov
+    author_email: roman@voltbro.com
+    generated_timestamp: 1591022619
