@@ -725,6 +725,7 @@ def main_path_test():
 
     tutorial.move_group.set_pose_target(pose_goal)
 
+
     ## Now, we call the planner to compute the plan and execute it.
     print("============== executed plan")
     plan = tutorial.move_group.go(wait=True)
@@ -738,6 +739,78 @@ def main_path_test():
     interface_description = tutorial.move_group.get_interface_description()
     print("============== we got interface_description")
     print(interface_description)
+
+
+def targets_test():
+    tutorial = MoveGroupPythonIntefaceTutorial()
+    target1 = geometry_msgs.msg.Pose()
+    #position:
+    target1.position.x = 0.0233631570636
+    target1.position.y = -0.0152418740998
+    target1.position.z = 0.322602977402
+    #orientation:
+    target1.orientation.x = 0.611672128569
+    target1.orientation.y = -0.215883862541
+    target1.orientation.z = 0.739494967978
+    target1.orientation.w = 0.179995992624
+
+    target2 = geometry_msgs.msg.Pose()
+    #position:
+    target2.position.x = 0.0233631570636
+    target2.position.y = -0.0152418740998
+    target2.position.z = 0.322602977402
+    #orientation:
+    target2.orientation.x = 0.611672128569
+    target2.orientation.y = -0.215883862541
+    target2.orientation.z = 0.739494967978
+    target2.orientation.w = 0.179995992624
+
+    targets = [target1, target2]
+
+    eff_link = tutorial.move_group.get_end_effector_link()
+
+    tutorial.move_group.set_pose_targets(targets, eff_link)
+
+    ## Now, we call the planner to compute the plan and execute it.
+    print("============== executed plan")
+    plan = tutorial.move_group.go(wait=True)
+    print(plan)
+
+def cartesian_test():
+    scale=1
+    tutorial = MoveGroupPythonIntefaceTutorial()
+    waypoints = list()
+
+    wpose = tutorial.move_group.get_current_pose().pose
+    wpose.position.z -= scale * 0.1  # First move up (z)
+    wpose.position.y += scale * 0.2  # and sideways (y)
+    waypoints.append(copy.deepcopy(wpose))
+
+    wpose.position.x += scale * 0.2  # Second move forward/backwards in (x)
+    waypoints.append(copy.deepcopy(wpose))
+
+    wpose.position.y -= scale * 0.2  # Third move sideways (y)
+    waypoints.append(copy.deepcopy(wpose))
+    print("============== waypoints")
+    for waypoint in waypoints:
+        print("{} \n".format(waypoint))
+
+    # We want the Cartesian path to be interpolated at a resolution of 1 cm
+    # which is why we will specify 0.01 as the eef_step in Cartesian
+    # translation.  We will disable the jump threshold by setting it to 0.0,
+    # ignoring the check for infeasible jumps in joint space, which is sufficient
+    # for this tutorial.
+    (plan, fraction) = tutorial.move_group.compute_cartesian_path(
+        waypoints,  # waypoints to follow
+        0.01,  # eef_step
+        0.0)
+
+    print("============== computed plan")
+    print(plan)
+    print("============== computed fraction")
+    print(fraction)
+
+    tutorial.move_group.execute(plan, wait=True)
 
 
 def random_poses_test():
@@ -768,43 +841,12 @@ def random_poses_test():
     # Note: there is no equivalent function for clear_joint_value_targets()
     tutorial.move_group.clear_pose_targets()
 
-if __name__ == '__main__':
-    #main2()
-    #main_path_test()
-    random_poses_test()
+    attached_object = moveit_msgs.msg.AttachedCollisionObject
 
-## BEGIN_TUTORIAL
-## .. _moveit_commander:
-##    http://docs.ros.org/melodic/api/moveit_commander/html/namespacemoveit__commander.html
-##
-## .. _MoveGroupCommander:
-##    http://docs.ros.org/melodic/api/moveit_commander/html/classmoveit__commander_1_1move__group_1_1MoveGroupCommander.html
-##
-## .. _RobotCommander:
-##    http://docs.ros.org/melodic/api/moveit_commander/html/classmoveit__commander_1_1robot_1_1RobotCommander.html
-##
-## .. _PlanningSceneInterface:
-##    http://docs.ros.org/melodic/api/moveit_commander/html/classmoveit__commander_1_1planning__scene__interface_1_1PlanningSceneInterface.html
-##
-## .. _DisplayTrajectory:
-##    http://docs.ros.org/melodic/api/moveit_msgs/html/msg/DisplayTrajectory.html
-##
-## .. _RobotTrajectory:
-##    http://docs.ros.org/melodic/api/moveit_msgs/html/msg/RobotTrajectory.html
-##
-## .. _rospy:
-##    http://docs.ros.org/melodic/api/rospy/html/
-## CALL_SUB_TUTORIAL imports
-## CALL_SUB_TUTORIAL setup
-## CALL_SUB_TUTORIAL basic_info
-## CALL_SUB_TUTORIAL plan_to_joint_state
-## CALL_SUB_TUTORIAL plan_to_pose
-## CALL_SUB_TUTORIAL plan_cartesian_path
-## CALL_SUB_TUTORIAL display_trajectory
-## CALL_SUB_TUTORIAL execute_plan
-## CALL_SUB_TUTORIAL add_box
-## CALL_SUB_TUTORIAL wait_for_scene_update
-## CALL_SUB_TUTORIAL attach_object
-## CALL_SUB_TUTORIAL detach_object
-## CALL_SUB_TUTORIAL remove_object
-## END_TUTORIAL
+if __name__ == '__main__':
+    # targets_test()
+    #cartesian_test()
+    main2()
+    #main_path_test()
+    # random_poses_test()
+
